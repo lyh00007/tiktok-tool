@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         tk达人未回复次数提取
 // @namespace    http://tampermonkey.net/
-// @version      2.3
+// @version      2.3.1
 // @description  提取并复制聊天时间，月份转换为数字，仅显示带时间的日期，并显示消息是否已读或未读，最后显示未回复次数，日期格式修改为 yyyy/M/d，输出格式修改为包含"未回复X次"
 // @author       @李懿恒
 // @match        https://affiliate.tiktokglobalshop.com/seller/im*
