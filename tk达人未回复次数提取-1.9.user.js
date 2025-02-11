@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         tk达人未回复次数提取
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.3
 // @description  提取并复制聊天时间，月份转换为数字，仅显示带时间的日期，并显示消息是否已读或未读，最后显示未回复次数，日期格式修改为 yyyy/M/d，输出格式修改为包含"未回复X次"
 // @author       @李懿恒
 // @match        https://affiliate.tiktokglobalshop.com/seller/im*
@@ -145,17 +145,33 @@
         });
     }
 
-    // 修改日期格式为 yyyy/M/d
+    // 修改日期格式为：2025/M/d 或提取年份
     function formatDate(timeString) {
-        const regex = /^([A-Za-z]+) (\d{1,2}), (\d{4}) (\d{1,2}):(\d{2}) (AM|PM)$/;
-        const match = timeString.match(regex);
+        // 处理两种格式：
+        // 1. Jan 2, 2024 4:57 PM
+        // 2. Jan 2 4:57 PM
+        const regex1 = /^([A-Za-z]+) (\d{1,2}), (\d{4}) (\d{1,2}):(\d{2}) (AM|PM)$/; // 格式1
+        const regex2 = /^([A-Za-z]+) (\d{1,2}) (\d{1,2}):(\d{2}) (AM|PM)$/; // 格式2
+
+        let match = timeString.match(regex1);
+        if (!match) {
+            match = timeString.match(regex2);
+        }
 
         if (!match) return null; // 没匹配到完整日期+时间则忽略
 
-        const [, monthStr, day, year] = match;
+        const [, monthStr, day] = match;
         const month = monthMap[monthStr]; // 转换月份
 
-        return `${year}/${month}/${day.padStart(2, '0')}`; // 日期格式修改为 yyyy/MM/dd
+        if (match[3]) {
+            // 如果是格式1，获取年份
+            const year = match[3];
+            return `${year}/${month}/${day.padStart(2, '0')}`; // 日期格式修改为 yyyy/MM/dd
+        }
+
+        // 如果是格式2，使用固定的 2025 年
+        const fixedYear = '2025';
+        return `${fixedYear}/${month}/${day.padStart(2, '0')}`; // 日期格式修改为 2025/M/d
     }
 
     fetchButton.addEventListener('click', extractContent);
