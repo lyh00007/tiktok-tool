@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         广告码链接生成
+// @name         广告码生成视频链接
 // @namespace    http://tampermonkey.net/
 // @version      1.1
-// @description  在广告码界面提取的时候，可以快速把广告码转换成视频链接填表
+// @description  在广告码界面提取的时候，可以快速把广告码转换成视频链接填表，用于达人给了广告码没给视频链接
 // @author       @李懿恒
 // @match        https://ads.tiktok.com/i18n/material/native*
 // @grant        none
@@ -64,7 +64,7 @@
 
     // 提取按钮
     const fetchButton = document.createElement('button');
-    fetchButton.textContent = '提取昵称';
+    fetchButton.textContent = '生成链接';
     fetchButton.style.padding = '5px 10px';
     fetchButton.style.cursor = 'pointer';
     fetchButton.style.backgroundColor = '#007bff';
