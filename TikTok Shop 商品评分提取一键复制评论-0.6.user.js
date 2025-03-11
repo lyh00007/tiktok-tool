@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         TikTok  Shop 评分提取（一键复制评论）
+// @name         TikTok Shop 商品评分提取一键复制评论-0.6.user.js
 // @namespace    http://tampermonkey.net/
 // @version      0.6
 // @description  提取 TikTok Global Shop 评分内容，支持一键复制所有内容和一键复制评论
