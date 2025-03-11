@@ -104,7 +104,7 @@
 
     // 提取昵称的函数
     function extractNicknames() {
-        const nicknameElements = document.querySelectorAll('div.sc-gFVvzn.truncate.text-neutral-text2');
+        const nicknameElements = document.querySelectorAll('div.sc-iMWBiJ.dVjemv.truncate.text-neutral-text2');
         if (nicknameElements.length === 0) {
             contentContainer.textContent = '未找到任何昵称！';
             return;
