@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         达人邀约名称批量
+// @name         达人筛选器
 // @namespace    http://tampermonkey.net/
 // @version      0.9
-// @description  tk批量邀约达人使用，用于爬取表放置Excel中上传标签
+// @description  tk批量邀约达人使用，用于爬取表放置Excel中上传标签，自行筛选并爬取
 // @author       @李懿恒
 // @match        https://affiliate.tiktokglobalshop.com/connection/creator?shop_region=US
 // @grant        none
@@ -35,7 +35,7 @@
     header.style.marginBottom = '10px';
 
     const title = document.createElement('h4');
-    title.textContent = '达人昵称复制器';
+    title.textContent = '达人筛选器';
     title.style.margin = '0';
     title.style.fontSize = '16px';
 
@@ -163,5 +163,53 @@
         });
     }
 
-    fetchButton.addEventListener('click', extractNicknames);
+    // 提取指定元素内容并添加复制按钮
+    function extractElementContent() {
+        const targetElement = document.querySelector('div[data-e2e="7f171169-3567-a24e"]');
+        if (!targetElement) {
+            console.log('未找到指定的元素！');
+            return;
+        }
+
+        const content = targetElement.innerText.trim();
+        const contentItem = document.createElement('div');
+        contentItem.style.display = 'flex';
+        contentItem.style.alignItems = 'center';
+        contentItem.style.marginBottom = '10px';
+
+        const contentText = document.createElement('span');
+        contentText.textContent = content;
+        contentText.style.flexGrow = '1';
+        contentText.style.marginRight = '10px';
+        contentText.style.whiteSpace = 'pre-wrap'; // 保留换行符和空格
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = '复制';
+        copyButton.style.padding = '2px 6px';
+        copyButton.style.cursor = 'pointer';
+        copyButton.style.backgroundColor = '#28a745';
+        copyButton.style.color = '#fff';
+        copyButton.style.border = 'none';
+        copyButton.style.borderRadius = '3px';
+        copyButton.style.fontSize = '12px';
+
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(content).then(() => {
+                copyButton.textContent = '已复制';
+                copyButton.style.backgroundColor = '#6c757d';
+                copyButton.style.cursor = 'default';
+            });
+        });
+
+        contentItem.appendChild(contentText);
+        contentItem.appendChild(copyButton);
+
+        // 将提取的内容添加到面板顶部
+        contentContainer.insertBefore(contentItem, contentContainer.firstChild);
+    }
+
+    fetchButton.addEventListener('click', () => {
+        extractNicknames();
+        extractElementContent(); // 同时提取指定元素内容
+    });
 })();
