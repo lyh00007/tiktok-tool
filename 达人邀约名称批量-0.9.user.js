@@ -35,7 +35,7 @@
     header.style.marginBottom = '10px';
 
     const title = document.createElement('h4');
-    title.textContent = '昵称快速提取';
+    title.textContent = '达人昵称复制器';
     title.style.margin = '0';
     title.style.fontSize = '16px';
 
