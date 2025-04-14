@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         tk达人昵称一键复制
+// @name         达人昵称复制
 // @namespace    http://tampermonkey.net/
 // @version      0.8
-// @description  在指定网址提取并复制昵称，支持滚动条显示、禁用一键复制按钮以及收起面板功能，方便填写tk达人表
+// @description  在指定网址提取并复制昵称，支持滚动条显示、禁用一键复制按钮以及收起面板功能
 // @author       @李懿恒
 // @match        https://affiliate.tiktokglobalshop.com/product/sample-request?shop_region=US
 // @grant        none
@@ -104,7 +104,7 @@
 
     // 提取昵称的函数
     function extractNicknames() {
-        const nicknameElements = document.querySelectorAll('div.sc-iMWBiJ.dVjemv.truncate.text-neutral-text2');
+        const nicknameElements = document.querySelectorAll('div.sc-cPiKLX.klQRfE.truncate.text-neutral-text2');
         if (nicknameElements.length === 0) {
             contentContainer.textContent = '未找到任何昵称！';
             return;
