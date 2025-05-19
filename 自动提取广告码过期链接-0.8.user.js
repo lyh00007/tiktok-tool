@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         自动提取广告码过期链接
 // @namespace    http://tampermonkey.net/
-// @version      0.8
-// @description  提取授权已过期的用户昵称和帖子ID，并去重
+// @version      1.1
+// @description  通过红色状态点提取授权已过期的用户链接
 // @author       @李懿恒
 // @match        https://ads.tiktok.com/i18n/material/native?*
 // @grant        none
@@ -14,184 +14,218 @@
     // 创建浮动交互面板
     const panel = document.createElement('div');
     panel.style.position = 'fixed';
-    panel.style.right = '10px';
+    panel.style.right = '20px';
     panel.style.top = '50%';
     panel.style.transform = 'translateY(-50%)';
-    panel.style.width = '250px';
-    panel.style.height = 'auto';
+    panel.style.width = '320px';
     panel.style.backgroundColor = '#fff';
-    panel.style.border = '1px solid #ccc';
-    panel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-    panel.style.padding = '10px';
-    panel.style.overflowY = 'auto';
-    panel.style.zIndex = 9999;
-    panel.style.borderRadius = '5px';
+    panel.style.border = '1px solid #ddd';
+    panel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    panel.style.padding = '15px';
+    panel.style.borderRadius = '8px';
+    panel.style.zIndex = 99999;
+    panel.style.fontFamily = 'Arial, sans-serif';
 
-    // 添加标题和收起按钮
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.marginBottom = '10px';
-
-    const title = document.createElement('h4');
-    title.textContent = '授权已过期用户提取';
-    title.style.margin = '0';
+    // 面板标题
+    const title = document.createElement('h3');
+    title.textContent = '授权过期用户提取';
+    title.style.margin = '0 0 15px 0';
+    title.style.color = '#333';
     title.style.fontSize = '16px';
+    title.style.display = 'flex';
+    title.style.alignItems = 'center';
+    title.style.justifyContent = 'space-between';
 
-    const toggleButton = document.createElement('button');
-    toggleButton.textContent = '收起';
-    toggleButton.style.padding = '2px 6px';
-    toggleButton.style.cursor = 'pointer';
-    toggleButton.style.backgroundColor = '#ffc107';
-    toggleButton.style.color = '#000';
-    toggleButton.style.border = 'none';
-    toggleButton.style.borderRadius = '3px';
-    toggleButton.style.fontSize = '12px';
+    // 收起按钮
+    const toggleBtn = document.createElement('span');
+    toggleBtn.textContent = '收起';
+    toggleBtn.style.cursor = 'pointer';
+    toggleBtn.style.background = '#ffc107';
+    toggleBtn.style.color = '#000';
+    toggleBtn.style.padding = '3px 8px';
+    toggleBtn.style.borderRadius = '4px';
+    toggleBtn.style.fontSize = '12px';
 
-    header.appendChild(title);
-    header.appendChild(toggleButton);
-    panel.appendChild(header);
+    title.appendChild(toggleBtn);
+    panel.appendChild(title);
 
-    // 添加内容容器
-    const contentContainer = document.createElement('div');
-    contentContainer.textContent = '点击“提取昵称”爬取内容';
-    contentContainer.style.marginBottom = '10px';
-    contentContainer.style.fontSize = '12px';
-    contentContainer.style.maxHeight = '300px';
-    contentContainer.style.overflowY = 'auto';
-    panel.appendChild(contentContainer);
+    // 内容区域
+    const content = document.createElement('div');
+    content.style.maxHeight = '400px';
+    content.style.overflowY = 'auto';
+    content.style.marginBottom = '15px';
+    content.innerHTML = '<p style="color:#666;margin:0;text-align:center;">点击下方按钮开始提取</p>';
+    panel.appendChild(content);
+
+    // 操作按钮容器
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.flexDirection = 'column';
+    btnContainer.style.gap = '10px';
 
     // 提取按钮
-    const fetchButton = document.createElement('button');
-    fetchButton.textContent = '提取授权已过期用户';
-    fetchButton.style.padding = '5px 10px';
-    fetchButton.style.cursor = 'pointer';
-    fetchButton.style.backgroundColor = '#007bff';
-    fetchButton.style.color = '#fff';
-    fetchButton.style.border = 'none';
-    fetchButton.style.borderRadius = '3px';
-    fetchButton.style.display = 'block';
-    fetchButton.style.margin = '0 auto';
-    panel.appendChild(fetchButton);
+    const extractBtn = document.createElement('button');
+    extractBtn.textContent = '提取过期用户';
+    extractBtn.style.background = '#1890ff';
+    extractBtn.style.color = '#fff';
+    extractBtn.style.border = 'none';
+    extractBtn.style.padding = '8px 16px';
+    extractBtn.style.borderRadius = '4px';
+    extractBtn.style.cursor = 'pointer';
+    extractBtn.style.fontWeight = 'bold';
 
-    // 一键复制按钮
-    const copyAllButton = document.createElement('button');
-    copyAllButton.textContent = '一键复制所有链接';
-    copyAllButton.style.padding = '5px 10px';
-    copyAllButton.style.cursor = 'pointer';
-    copyAllButton.style.backgroundColor = '#28a745';
-    copyAllButton.style.color = '#fff';
-    copyAllButton.style.border = 'none';
-    copyAllButton.style.borderRadius = '3px';
-    copyAllButton.style.display = 'block';
-    copyAllButton.style.margin = '10px auto 0';
-    copyAllButton.style.fontSize = '14px';
-    panel.appendChild(copyAllButton);
+    // 复制按钮
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = '一键复制所有';
+    copyBtn.style.background = '#52c41a';
+    copyBtn.style.color = '#fff';
+    copyBtn.style.border = 'none';
+    copyBtn.style.padding = '8px 16px';
+    copyBtn.style.borderRadius = '4px';
+    copyBtn.style.cursor = 'pointer';
 
-    // 将面板添加到页面
+    btnContainer.appendChild(extractBtn);
+    btnContainer.appendChild(copyBtn);
+    panel.appendChild(btnContainer);
     document.body.appendChild(panel);
 
-    // 收起功能
-    let isPanelVisible = true;
-    toggleButton.addEventListener('click', () => {
-        isPanelVisible = !isPanelVisible;
-        contentContainer.style.display = isPanelVisible ? 'block' : 'none';
-        fetchButton.style.display = isPanelVisible ? 'block' : 'none';
-        copyAllButton.style.display = isPanelVisible ? 'block' : 'none';
-        toggleButton.textContent = isPanelVisible ? '收起' : '展开';
+    // 收起/展开功能
+    let isExpanded = true;
+    toggleBtn.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        content.style.display = isExpanded ? 'block' : 'none';
+        btnContainer.style.display = isExpanded ? 'flex' : 'none';
+        toggleBtn.textContent = isExpanded ? '收起' : '展开';
     });
 
-    // 使用 MutationObserver 监听 DOM 变化
-    const observer = new MutationObserver(() => {
-        // 调用提取授权已过期用户的函数
-        extractExpiredUsers();
-    });
+    // 核心提取函数
+    function findExpiredUsers() {
+        content.innerHTML = '<p style="color:#666;text-align:center;">正在扫描页面...</p>';
 
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // 提取授权已过期用户的函数
-    function extractExpiredUsers() {
         setTimeout(() => {
-            const rows = document.querySelectorAll('tr.vi-table__row');
-            if (rows.length === 0) {
-                contentContainer.textContent = '未找到任何授权已过期的用户！';
-                return;
-            }
+            const expiredUsers = [];
+            const redDots = document.querySelectorAll('.status-dot[style*="rgb(244, 88, 88)"]');
 
-            contentContainer.innerHTML = '';
-            const expiredUsersSet = new Set(); // 使用 Set 来去重
+            redDots.forEach(dot => {
+                const row = dot.closest('tr.biz-table-row');
+                if (row) {
+                    const nickname = row.querySelector('.user-name')?.textContent?.trim();
+                    const postId = row.querySelector('td.vi-table_1_column_3 .cell')?.textContent?.trim();
 
-            rows.forEach((row) => {
-                const statusElement = row.querySelector('.main-text');
-                if (statusElement && statusElement.textContent.includes('授权已过期')) {
-                    const nicknameElement = row.querySelector('.user-name');
-                    const postIdElement = row.querySelector('.vi-table_1_column_3');
-
-                    if (nicknameElement && postIdElement) {
-                        const nickname = nicknameElement.textContent.trim();
-                        const postId = postIdElement.textContent.trim();
-
-                        const userLink = `https://www.tiktok.com/@${nickname}/video/${postId}`;
-
-                        expiredUsersSet.add(userLink); // 添加到 Set 中，自动去重
+                    if (nickname && postId) {
+                        expiredUsers.push({
+                            nickname,
+                            postId,
+                            link: `https://www.tiktok.com/@${nickname}/video/${postId}`
+                        });
                     }
                 }
             });
 
-            if (expiredUsersSet.size === 0) {
-                contentContainer.textContent = '未找到任何授权已过期的用户！';
-                return;
-            }
-
-            // 清空内容容器并显示去重后的用户链接
-            expiredUsersSet.forEach((userLink) => {
-                const userItem = document.createElement('div');
-                userItem.style.display = 'flex';
-                userItem.style.alignItems = 'center';
-                userItem.style.marginBottom = '5px';
-
-                const userText = document.createElement('span');
-                userText.textContent = userLink;
-                userText.style.flexGrow = '1';
-                userText.style.marginRight = '10px';
-                userText.style.whiteSpace = 'nowrap';
-                userText.style.overflow = 'hidden';
-                userText.style.textOverflow = 'ellipsis';
-
-                const copyButton = document.createElement('button');
-                copyButton.textContent = '复制';
-                copyButton.style.padding = '2px 6px';
-                copyButton.style.cursor = 'pointer';
-                copyButton.style.backgroundColor = '#28a745';
-                copyButton.style.color = '#fff';
-                copyButton.style.border = 'none';
-                copyButton.style.borderRadius = '3px';
-                copyButton.style.fontSize = '12px';
-
-                copyButton.addEventListener('click', () => {
-                    navigator.clipboard.writeText(userLink).then(() => {
-                        copyButton.textContent = '已复制';
-                        copyButton.style.backgroundColor = '#6c757d';
-                        copyButton.style.cursor = 'default';
-                    });
-                });
-
-                contentContainer.appendChild(userItem);
-                userItem.appendChild(userText);
-                userItem.appendChild(copyButton);
-            });
-
-            copyAllButton.addEventListener('click', () => {
-                const allUsersText = Array.from(expiredUsersSet).join('\n'); // 将 Set 转为数组并加入换行符
-                navigator.clipboard.writeText(allUsersText).then(() => {
-                    copyAllButton.textContent = '已复制所有链接';
-                    copyAllButton.style.backgroundColor = '#6c757d';
-                    copyAllButton.style.cursor = 'default';
-                });
-            });
-        }, 2000); // 延迟2秒执行提取
+            displayResults(expiredUsers);
+        }, 1000);
     }
 
-    fetchButton.addEventListener('click', extractExpiredUsers);
+    // 显示结果
+    function displayResults(users) {
+        content.innerHTML = '';
+
+        if (users.length === 0) {
+            content.innerHTML = '<p style="color:#f5222d;text-align:center;">未找到过期用户</p>';
+            return;
+        }
+
+        const countInfo = document.createElement('p');
+        countInfo.textContent = `共找到 ${users.length} 个过期用户:`;
+        countInfo.style.margin = '0 0 10px 0';
+        countInfo.style.fontWeight = 'bold';
+        content.appendChild(countInfo);
+
+        const list = document.createElement('div');
+        list.style.display = 'flex';
+        list.style.flexDirection = 'column';
+        list.style.gap = '8px';
+
+        users.forEach((user, index) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.padding = '8px';
+            item.style.background = index % 2 === 0 ? '#fafafa' : '#fff';
+            item.style.borderRadius = '4px';
+
+            const num = document.createElement('span');
+            num.textContent = `${index + 1}.`;
+            num.style.marginRight = '8px';
+            num.style.color = '#666';
+            num.style.minWidth = '20px';
+
+            const link = document.createElement('a');
+            link.textContent = user.link;
+            link.href = user.link;
+            link.target = '_blank';
+            link.style.flex = '1';
+            link.style.overflow = 'hidden';
+            link.style.textOverflow = 'ellipsis';
+            link.style.whiteSpace = 'nowrap';
+            link.style.color = '#1890ff';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = '复制';
+            copyBtn.style.marginLeft = '8px';
+            copyBtn.style.padding = '2px 6px';
+            copyBtn.style.background = '#d9d9d9';
+            copyBtn.style.border = 'none';
+            copyBtn.style.borderRadius = '2px';
+            copyBtn.style.cursor = 'pointer';
+
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(user.link);
+                copyBtn.textContent = '✓';
+                copyBtn.style.background = '#52c41a';
+                copyBtn.style.color = '#fff';
+                setTimeout(() => {
+                    copyBtn.textContent = '复制';
+                    copyBtn.style.background = '#d9d9d9';
+                    copyBtn.style.color = '#000';
+                }, 1500);
+            });
+
+            item.appendChild(num);
+            item.appendChild(link);
+            item.appendChild(copyBtn);
+            list.appendChild(item);
+        });
+
+        content.appendChild(list);
+
+        // 一键复制功能
+        copyBtn.onclick = () => {
+            const allLinks = users.map(u => u.link).join('\n');
+            navigator.clipboard.writeText(allLinks).then(() => {
+                copyBtn.textContent = '✓ 复制成功';
+                copyBtn.style.background = '#52c41a';
+                setTimeout(() => {
+                    copyBtn.textContent = '一键复制所有';
+                    copyBtn.style.background = '#52c41a';
+                }, 2000);
+            });
+        };
+    }
+
+    // 点击提取按钮
+    extractBtn.addEventListener('click', findExpiredUsers);
+
+    // 自动监听表格变化
+    const observer = new MutationObserver(() => {
+        if (content.textContent.includes('点击下方按钮') ||
+            content.textContent.includes('未找到')) {
+            findExpiredUsers();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 })();
