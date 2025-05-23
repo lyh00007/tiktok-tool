@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         自动提取广告码过期链接
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.3
 // @description  通过红色状态点提取授权已过期的用户链接
 // @author       @李懿恒
 // @match        https://ads.tiktok.com/i18n/material/native?*
@@ -74,9 +74,19 @@
     extractBtn.style.cursor = 'pointer';
     extractBtn.style.fontWeight = 'bold';
 
-    // 复制按钮
+    // 复制所有用户名按钮
+    const copyAllNamesBtn = document.createElement('button');
+    copyAllNamesBtn.textContent = '一键复制所有用户名';
+    copyAllNamesBtn.style.background = '#722ed1';
+    copyAllNamesBtn.style.color = '#fff';
+    copyAllNamesBtn.style.border = 'none';
+    copyAllNamesBtn.style.padding = '8px 16px';
+    copyAllNamesBtn.style.borderRadius = '4px';
+    copyAllNamesBtn.style.cursor = 'pointer';
+
+    // 复制所有链接按钮
     const copyBtn = document.createElement('button');
-    copyBtn.textContent = '一键复制所有';
+    copyBtn.textContent = '一键复制所有链接';
     copyBtn.style.background = '#52c41a';
     copyBtn.style.color = '#fff';
     copyBtn.style.border = 'none';
@@ -85,6 +95,7 @@
     copyBtn.style.cursor = 'pointer';
 
     btnContainer.appendChild(extractBtn);
+    btnContainer.appendChild(copyAllNamesBtn);
     btnContainer.appendChild(copyBtn);
     panel.appendChild(btnContainer);
     document.body.appendChild(panel);
@@ -160,53 +171,109 @@
             num.style.color = '#666';
             num.style.minWidth = '20px';
 
+            const userInfo = document.createElement('div');
+            userInfo.style.flex = '1';
+            userInfo.style.overflow = 'hidden';
+
+            const nickname = document.createElement('div');
+            nickname.textContent = `@${user.nickname}`;
+            nickname.style.fontWeight = 'bold';
+            nickname.style.marginBottom = '4px';
+
             const link = document.createElement('a');
             link.textContent = user.link;
             link.href = user.link;
             link.target = '_blank';
-            link.style.flex = '1';
             link.style.overflow = 'hidden';
             link.style.textOverflow = 'ellipsis';
             link.style.whiteSpace = 'nowrap';
             link.style.color = '#1890ff';
+            link.style.display = 'block';
 
-            const copyBtn = document.createElement('button');
-            copyBtn.textContent = '复制';
-            copyBtn.style.marginLeft = '8px';
-            copyBtn.style.padding = '2px 6px';
-            copyBtn.style.background = '#d9d9d9';
-            copyBtn.style.border = 'none';
-            copyBtn.style.borderRadius = '2px';
-            copyBtn.style.cursor = 'pointer';
+            userInfo.appendChild(nickname);
+            userInfo.appendChild(link);
+            
+            const btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.flexDirection = 'column';
+            btnGroup.style.gap = '4px';
 
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(user.link);
-                copyBtn.textContent = '✓';
-                copyBtn.style.background = '#52c41a';
-                copyBtn.style.color = '#fff';
+            // 复制用户名按钮
+            const copyNameBtn = document.createElement('button');
+            copyNameBtn.textContent = '复制用户名';
+            copyNameBtn.style.padding = '2px 6px';
+            copyNameBtn.style.background = '#d9d9d9';
+            copyNameBtn.style.border = 'none';
+            copyNameBtn.style.borderRadius = '2px';
+            copyNameBtn.style.cursor = 'pointer';
+            copyNameBtn.style.fontSize = '12px';
+
+            copyNameBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(user.nickname);
+                copyNameBtn.textContent = '✓';
+                copyNameBtn.style.background = '#52c41a';
+                copyNameBtn.style.color = '#fff';
                 setTimeout(() => {
-                    copyBtn.textContent = '复制';
-                    copyBtn.style.background = '#d9d9d9';
-                    copyBtn.style.color = '#000';
+                    copyNameBtn.textContent = '复制用户名';
+                    copyNameBtn.style.background = '#d9d9d9';
+                    copyNameBtn.style.color = '#000';
                 }, 1500);
             });
 
+            // 复制链接按钮
+            const copyLinkBtn = document.createElement('button');
+            copyLinkBtn.textContent = '复制链接';
+            copyLinkBtn.style.padding = '2px 6px';
+            copyLinkBtn.style.background = '#d9d9d9';
+            copyLinkBtn.style.border = 'none';
+            copyLinkBtn.style.borderRadius = '2px';
+            copyLinkBtn.style.cursor = 'pointer';
+            copyLinkBtn.style.fontSize = '12px';
+
+            copyLinkBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(user.link);
+                copyLinkBtn.textContent = '✓';
+                copyLinkBtn.style.background = '#52c41a';
+                copyLinkBtn.style.color = '#fff';
+                setTimeout(() => {
+                    copyLinkBtn.textContent = '复制链接';
+                    copyLinkBtn.style.background = '#d9d9d9';
+                    copyLinkBtn.style.color = '#000';
+                }, 1500);
+            });
+
+            btnGroup.appendChild(copyNameBtn);
+            btnGroup.appendChild(copyLinkBtn);
+
             item.appendChild(num);
-            item.appendChild(link);
-            item.appendChild(copyBtn);
+            item.appendChild(userInfo);
+            item.appendChild(btnGroup);
             list.appendChild(item);
         });
 
         content.appendChild(list);
 
-        // 一键复制功能
+        // 一键复制所有用户名功能
+        copyAllNamesBtn.onclick = () => {
+            const allNames = users.map(u => u.nickname).join('\n');
+            navigator.clipboard.writeText(allNames).then(() => {
+                copyAllNamesBtn.textContent = '✓ 复制成功';
+                copyAllNamesBtn.style.background = '#722ed1';
+                setTimeout(() => {
+                    copyAllNamesBtn.textContent = '一键复制所有用户名';
+                    copyAllNamesBtn.style.background = '#722ed1';
+                }, 2000);
+            });
+        };
+
+        // 一键复制所有链接功能
         copyBtn.onclick = () => {
             const allLinks = users.map(u => u.link).join('\n');
             navigator.clipboard.writeText(allLinks).then(() => {
                 copyBtn.textContent = '✓ 复制成功';
                 copyBtn.style.background = '#52c41a';
                 setTimeout(() => {
-                    copyBtn.textContent = '一键复制所有';
+                    copyBtn.textContent = '一键复制所有链接';
                     copyBtn.style.background = '#52c41a';
                 }, 2000);
             });
